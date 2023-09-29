@@ -1,3 +1,7 @@
+// dotenv
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import express from "express";
@@ -16,6 +20,8 @@ export async function startApolloServer(typeDefs, resolvers) {
 
   app.use("/graphql", cors(), express.json(), expressMiddleware(server));
 
-  await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
-  console.log(`🚀 Server ready at http://localhost:4000`);
+  await new Promise((resolve) =>
+    httpServer.listen({ port: process.env.PORT }, resolve)
+  );
+  console.log(`🚀 Server ready at http://localhost:${process.env.PORT}`);
 }
