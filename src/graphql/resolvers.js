@@ -14,7 +14,7 @@ export const resolvers = {
       return user;
     },
 
-    companyByUrl: async (root, args) => {
+    companyByDocument: async (root, args) => {
       const { document } = args;
       const shipments = await axios.get(companyUrl + "/get/" + document).then((res) => res.data.data);
       return shipments;

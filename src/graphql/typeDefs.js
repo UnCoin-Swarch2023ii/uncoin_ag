@@ -27,8 +27,8 @@ export const typeDefs = gql`
   }
 
   type Query {
-    userByDocument(document : Int): [User]!
-    companyByUrl(document : Int): [Company]!
+    userByDocument(document : Int): User!
+    companyByDocument(document : Int): Company!
 
     allShipments: [Shipment]!
     shipmentsById(shipmentId : String): Shipment!
@@ -41,7 +41,7 @@ export const typeDefs = gql`
       user_name: String
       document: Int
       password: String
-    ): String
+    ): User
     signUpUser(
       user_name: String
       user_lastname: String
@@ -49,20 +49,20 @@ export const typeDefs = gql`
       balance: Float
       password: String
       enable: Boolean
-    ): String
-    updateUser(document: Int): [User]
+    ): User
+    updateUser(document: Int): User
 
     signInCompany(
       company_name : String
       document : Int
       password : String
-    ): String
+    ): Company
     signUpCompany(
       company_name: String
       document: Int
       balance: Float
       password: String
-    ): String
+    ): Company
 
     addShipment(
       userId: String
