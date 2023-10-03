@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+  # Transactions microservice
+  transactions_db:
+    container_name: ${DB_HOST}
+    image: postgres:16rc1-alpine3.18
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 120
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+  transactions_ms:
+    depends_on:
+      transactions_db:
+        condition: service_healthy
+    image: sesanchezo/transactions_ms
+    # build: .
+    container_name: transactions_ms
+    restart: always
+    ports:
+      - 3002:3002
+    environment:
+      - PORT=${PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+
+  # Billing microservice
+  mongo:
+    image: mongo
+    container_name: mongo
+    logging:
+      driver: none
+
+  billing_ms:
+    depends_on:
+      - mongo
+    image: guaca31/uncoin_billing
+    container_name: billing_ms
+    restart: always
+    ports:
+      - 4000:4000
+    environment:
+      - PORT=4000
+      - DB_PORT=27017
+      - MONGO_URI=${MONGO_URI}
+
+  # Kyc microservice
+  kyc_ms:
+    image: gotalorag/kyc_ms
+    container_name: kyc_ms
+    ports:
+      - 3000:000
+
+  # Api gateway
+  api_gateway:
+    image: sesanchezo/uncoin_api_gateway
+    container_name: api_gateway
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      - PORT=3000
+      - TRANSACTIONS_MS_URL=http://transactions_ms:3002
+      - BILLING_MS_URL=http://billing_ms:4000
+      - KYC_MS_URL=http://kyc_ms:3000
