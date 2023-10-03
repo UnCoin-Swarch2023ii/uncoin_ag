@@ -82,7 +82,7 @@ export const resolvers = {
     },
     compareImages: async (_, { image1, image2 }) => {
       try {
-        const response = await axios.post(urlKycMs + "/compare-images", {
+        const response = await axios.post(urlKycMs + "/compare_images", {
           image1,
           image2,
         });
