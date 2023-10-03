@@ -2,19 +2,20 @@ import { gql } from "graphql-tag";
 
 export const typeDefs = gql`
   type Query {
-    hello: String
     # Transactions
     listTransactions: [Transaction]
     getTransactionsByUserId(id: ID!): [Transaction]
     getTransactionById(id: ID!): Transaction
     # Users
     userByDocument(document: Int): User!
-    # Companies
     companyByDocument(document: Int): Company!
     # Shipments
     allShipments: [Shipment]!
     shipmentsById(shipmentId: String): Shipment!
     shipmentsByUser(user: String): [Shipment]!
+    # Kyc
+    getKycImage(filename: String): Any
+    compareImages(image1: Upload!, image2: Upload!): Any
   }
 
   type Mutation {
@@ -60,9 +61,13 @@ export const typeDefs = gql`
       shipmentValue: Float
       shipmentDate: String
     ): Shipment
-
     deleteShipment(id: String): Shipment
+    # Kyc
+    deleteImage(filename: String): Any
   }
+
+  scalar Any
+  scalar Upload
 
   # ----------- Transactions -----------
   type Order {
