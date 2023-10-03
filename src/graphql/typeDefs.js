@@ -21,6 +21,7 @@ export const typeDefs = gql`
     # Transactions
     createTransaction(input: TransactionInput): Transaction
     createChargeOrder(input: ChargeOrderInput): Order
+    # Users
     deleteUser(document: Int): User
     signInUser(user_name: String, document: Int, password: String): User
     signUpUser(
@@ -32,7 +33,6 @@ export const typeDefs = gql`
       enable: Boolean
     ): User
     updateUser(document: Int): User
-
     signInCompany(
       company_name: String
       document: Int
@@ -45,6 +45,7 @@ export const typeDefs = gql`
       password: String
     ): Company
 
+    # Shipments
     addShipment(
       userId: String
       companyId: String

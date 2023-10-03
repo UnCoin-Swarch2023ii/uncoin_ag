@@ -11,6 +11,7 @@ const companyUrl = "http://localhost:3001/auth-api/company/";
 export const resolvers = {
   Query: {
     hello: () => "Hello world!",
+    // Transactions
     listTransactions: async () => {
       try {
         const response = await axios.get(urlTransactionsMs + "/");
@@ -78,6 +79,7 @@ export const resolvers = {
     },
   },
   Mutation: {
+    // Transactions
     createTransaction: async (_, { input }) => {
       try {
         const response = await axios.post(urlTransactionsMs + "/p2p", input);
