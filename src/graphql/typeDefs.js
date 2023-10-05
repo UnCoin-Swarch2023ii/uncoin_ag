@@ -25,14 +25,7 @@ export const typeDefs = gql`
     # Users
     deleteUser(document: Int, token: String): User
     signInUser(user_name: String, document: Int, password: String): User
-    signUpUser(
-      user_name: String
-      user_lastname: String
-      document: Int
-      balance: Float
-      password: String
-      enable: Boolean
-    ): User
+    signUpUser(input: UserInput): Any
     updateUser(document: Int, token: String): User
     signInCompany(
       company_name: String
@@ -108,6 +101,15 @@ export const typeDefs = gql`
   # ----------- KYC -----------
   type User {
     id: ID
+    userName: String
+    userLastName: String
+    password: String
+    document: Int
+    balance: Float
+    enable: Boolean
+  }
+
+  input UserInput {
     userName: String
     userLastName: String
     password: String
