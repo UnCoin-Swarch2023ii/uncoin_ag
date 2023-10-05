@@ -24,12 +24,7 @@ export const typeDefs = gql`
     createChargeOrder(input: ChargeOrderInput, token: String): Order
     # Users
     deleteUser(document: Int, token: String): User
-    signInUser(
-      user_name: String
-      document: Int
-      password: String
-      token: String
-    ): User
+    signInUser(user_name: String, document: Int, password: String): User
     signUpUser(
       user_name: String
       user_lastname: String
@@ -37,21 +32,18 @@ export const typeDefs = gql`
       balance: Float
       password: String
       enable: Boolean
-      token: String
     ): User
     updateUser(document: Int, token: String): User
     signInCompany(
       company_name: String
       document: Int
       password: String
-      token: String
     ): Company
     signUpCompany(
       company_name: String
       document: Int
       balance: Float
       password: String
-      token: String
     ): Company
 
     # Shipments

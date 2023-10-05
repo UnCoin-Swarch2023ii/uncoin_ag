@@ -24,7 +24,7 @@ export const resolvers = {
         throw new Error(error);
       }
     },
-    getTransactionsByUserId: async (_, { id }) => {
+    getTransactionsByUserId: async (_, { id, token }) => {
       try {
         // Verify token with auth-ms
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
@@ -37,7 +37,7 @@ export const resolvers = {
         throw new Error(error);
       }
     },
-    getTransactionById: async (_, { id }) => {
+    getTransactionById: async (_, { id, token }) => {
       try {
         // Verify token with auth-ms
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
@@ -66,25 +66,54 @@ export const resolvers = {
       return shipments;
     },
     // Shipments
-    allShipments: async () => {
-      const shipments = await axios
-        .get(shipmentUrl)
-        .then((res) => res.data.data);
-      return shipments;
+    allShipments: async (_, { token }) => {
+      try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
+        const shipments = await axios
+          .get(shipmentUrl)
+          .then((res) => res.data.data);
+        return shipments;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     shipmentsById: async (root, args) => {
-      const { shipmentId } = args;
-      const shipment = await axios
-        .get(shipmentUrl + "get-shipment/" + shipmentId)
-        .then((res) => res.data.data);
-      return shipment;
+      try {
+        const { shipmentId, token } = args;
+
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
+        const shipment = await axios
+          .get(shipmentUrl + "get-shipment/" + shipmentId)
+          .then((res) => res.data.data);
+        return shipment;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     shipmentsByUser: async (root, args) => {
-      const { user } = args;
-      const shipments = await axios
-        .get(shipmentUrl + "userShipments/" + user)
-        .then((res) => res.data.data);
-      return shipments;
+      try {
+        const { token, ...user } = args;
+
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
+        const shipments = await axios
+          .get(shipmentUrl + "userShipments/" + user)
+          .then((res) => res.data.data);
+        return shipments;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     // Kyc
     getKycImage: async (_, { filename, token }) => {
@@ -130,6 +159,10 @@ export const resolvers = {
     },
     createChargeOrder: async (_, { input, token }) => {
       try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
         const response = await axios.post(
           urlTransactionsMs + "/create-order/",
           input
@@ -180,24 +213,37 @@ export const resolvers = {
 
     // Shipments
     addShipment: async (root, args) => {
-      const shipment = { ...args };
+      const { token, ...shipmentData } = args; // Destructure token from args
+      const shipment = { ...shipmentData };
       const response = await axios
-        .post(shipmentUrl, shipment)
+        .post(shipmentUrl, shipment, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        })
         .then((res) => res.data.data);
       return response;
     },
     updateShipment: async (root, args) => {
-      const id = args.id;
-      const shipment = { ...args };
+      const { token, id, ...shipmentData } = args; // Destructure token and id from args
+      const shipment = { ...shipmentData };
       const response = await axios
-        .patch(shipmentUrl + "/update/" + id, shipment)
+        .patch(shipmentUrl + "/update/" + id, shipment, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        })
         .then((res) => res.data.data);
       return response;
     },
     deleteShipment: async (root, args) => {
-      const id = args.id;
+      const { token, id } = args; // Destructure token and id from args
       const response = await axios
-        .delete(shipmentUrl + "/" + id)
+        .delete(shipmentUrl + "/" + id, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
+        })
         .then((res) => res.data.data);
       return response;
     },
