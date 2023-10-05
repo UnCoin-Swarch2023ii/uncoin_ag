@@ -5,8 +5,8 @@ const urlTransactionsMs = "http://transactions_ms:3002/transactions-api";
 const shipmentUrl = "http://billing_ms:4000/billing-api/";
 
 // TODO: Review the next urls and their queries and mutations
-const userUrl = "http://localhost:4001/auth-api/user";
-const companyUrl = "http://localhost:4001/auth-api/company";
+const userUrl = "http://users_ms:8080/auth-api/user";
+const companyUrl = "http://users_ms:8080/auth-api/company";
 
 export const resolvers = {
   Query: {
