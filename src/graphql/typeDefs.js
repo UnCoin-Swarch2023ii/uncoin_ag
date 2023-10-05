@@ -3,28 +3,33 @@ import { gql } from "graphql-tag";
 export const typeDefs = gql`
   type Query {
     # Transactions
-    listTransactions: [Transaction]
-    getTransactionsByUserId(id: ID!): [Transaction]
-    getTransactionById(id: ID!): Transaction
+    listTransactions(token: String): [Transaction]
+    getTransactionsByUserId(id: ID!, token: String): [Transaction]
+    getTransactionById(id: ID!, token: String): Transaction
     # Users
-    userByDocument(document: Int): User!
-    companyByDocument(document: Int): Company!
+    userByDocument(document: Int, token: String): User!
+    companyByDocument(document: Int, token: String): Company!
     # Shipments
-    allShipments: [Shipment]!
-    shipmentsById(shipmentId: String): Shipment!
-    shipmentsByUser(user: String): [Shipment]!
+    allShipments(token: String): [Shipment]!
+    shipmentsById(shipmentId: String, token: String): Shipment!
+    shipmentsByUser(user: String, token: String): [Shipment]!
     # Kyc
-    getKycImage(filename: String): Any
+    getKycImage(filename: String, token: String): Any
     compareImages(image1: Upload!, image2: Upload!): Any
   }
 
   type Mutation {
     # Transactions
-    createTransaction(input: TransactionInput): Transaction
-    createChargeOrder(input: ChargeOrderInput): Order
+    createTransaction(input: TransactionInput, token: String): Transaction
+    createChargeOrder(input: ChargeOrderInput, token: String): Order
     # Users
-    deleteUser(document: Int): User
-    signInUser(user_name: String, document: Int, password: String): User
+    deleteUser(document: Int, token: String): User
+    signInUser(
+      user_name: String
+      document: Int
+      password: String
+      token: String
+    ): User
     signUpUser(
       user_name: String
       user_lastname: String
@@ -32,18 +37,21 @@ export const typeDefs = gql`
       balance: Float
       password: String
       enable: Boolean
+      token: String
     ): User
-    updateUser(document: Int): User
+    updateUser(document: Int, token: String): User
     signInCompany(
       company_name: String
       document: Int
       password: String
+      token: String
     ): Company
     signUpCompany(
       company_name: String
       document: Int
       balance: Float
       password: String
+      token: String
     ): Company
 
     # Shipments
@@ -52,6 +60,7 @@ export const typeDefs = gql`
       companyId: String
       shipmentValue: Float
       shipmentDate: String
+      token: String
     ): Shipment
 
     updateShipment(
@@ -60,10 +69,11 @@ export const typeDefs = gql`
       companyId: String
       shipmentValue: Float
       shipmentDate: String
+      token: String
     ): Shipment
-    deleteShipment(id: String): Shipment
+    deleteShipment(id: String, token: String): Shipment
     # Kyc
-    deleteImage(filename: String): Any
+    deleteImage(filename: String, token: String): Any
   }
 
   scalar Any
@@ -105,12 +115,13 @@ export const typeDefs = gql`
 
   # ----------- KYC -----------
   type User {
-    _id: ID
+    id: ID
     userName: String
-    userLastname: String
+    userLastName: String
     password: String
     document: Int
     balance: Float
+    enable: Boolean
   }
 
   type Company {

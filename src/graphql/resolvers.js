@@ -5,34 +5,49 @@ const urlTransactionsMs = "http://transactions_ms:3002/transactions-api";
 const shipmentUrl = "http://billing_ms:4000/billing-api/";
 
 // TODO: Review the next urls and their queries and mutations
-const userUrl = "http://localhost:3001/auth-api/user/";
-const companyUrl = "http://localhost:3001/auth-api/company/";
+const userUrl = "http://localhost:4001/auth-api/user";
+const companyUrl = "http://localhost:4001/auth-api/company";
 
 export const resolvers = {
   Query: {
     // Transactions
-    listTransactions: async () => {
+    listTransactions: async (_, { token }) => {
       try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
         const response = await axios.get(urlTransactionsMs + "/");
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
     getTransactionsByUserId: async (_, { id }) => {
       try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
         const response = await axios.get(urlTransactionsMs + "/list/" + id);
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
     getTransactionById: async (_, { id }) => {
       try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
         const response = await axios.get(urlTransactionsMs + "/detail/" + id);
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
     // Users
@@ -72,12 +87,17 @@ export const resolvers = {
       return shipments;
     },
     // Kyc
-    getKycImage: async (_, { filename }) => {
+    getKycImage: async (_, { filename, token }) => {
       try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
         const response = await axios.get(urlKycMs + "/get-image/" + filename);
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
     compareImages: async (_, { image1, image2 }) => {
@@ -89,20 +109,26 @@ export const resolvers = {
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
   },
   Mutation: {
     // Transactions
-    createTransaction: async (_, { input }) => {
+    createTransaction: async (_, { input, token }) => {
       try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
         const response = await axios.post(urlTransactionsMs + "/p2p", input);
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
-    createChargeOrder: async (_, { input }) => {
+    createChargeOrder: async (_, { input, token }) => {
       try {
         const response = await axios.post(
           urlTransactionsMs + "/create-order/",
@@ -111,6 +137,7 @@ export const resolvers = {
         return response.data.order;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
     // Users
@@ -121,19 +148,13 @@ export const resolvers = {
         .then((res) => res.data.data);
       return response;
     },
-    signUpUser: async (root, args) => {
-      const { user } = { ...args };
-      const response = await axios
-        .post(userUrl + "/signin", user)
-        .then((res) => res.data.data);
-      return response;
-    },
-    signUpUser: async (root, args) => {
-      const { user } = { ...args };
-      const response = await axios
-        .post(userUrl + "/signup", user)
-        .then((res) => res.data.data);
-      return response;
+    signUpUser: async (_, { input }) => {
+      try {
+        const response = await axios.post(userUrl + "/signup", input);
+        return response.data;
+      } catch (error) {
+        console.log(error);
+      }
     },
     updateUser: async (root, args) => {
       const { document } = { args };
@@ -180,14 +201,20 @@ export const resolvers = {
         .then((res) => res.data.data);
       return response;
     },
-    deleteImage: async (_, { filename }) => {
+    // KYC
+    deleteImage: async (_, { filename, token }) => {
       try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
         const response = await axios.delete(
           urlKycMs + "/delete-image/" + filename
         );
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
+        throw new Error(error);
       }
     },
   },
