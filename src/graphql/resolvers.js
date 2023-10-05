@@ -213,39 +213,64 @@ export const resolvers = {
 
     // Shipments
     addShipment: async (root, args) => {
-      const { token, ...shipmentData } = args; // Destructure token from args
-      const shipment = { ...shipmentData };
-      const response = await axios
-        .post(shipmentUrl, shipment, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to headers
-          },
-        })
-        .then((res) => res.data.data);
-      return response;
+      try {
+        const { token, ...shipmentData } = args; // Destructure token from args
+
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
+        const shipment = { ...shipmentData };
+        const response = await axios
+          .post(shipmentUrl, shipment, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add token to headers
+            },
+          })
+          .then((res) => res.data.data);
+        return response;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     updateShipment: async (root, args) => {
-      const { token, id, ...shipmentData } = args; // Destructure token and id from args
-      const shipment = { ...shipmentData };
-      const response = await axios
-        .patch(shipmentUrl + "/update/" + id, shipment, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to headers
-          },
-        })
-        .then((res) => res.data.data);
-      return response;
+      try {
+        const { token, id, ...shipmentData } = args; // Destructure token and id from args
+
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
+        const shipment = { ...shipmentData };
+        const response = await axios
+          .patch(shipmentUrl + "/update/" + id, shipment, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add token to headers
+            },
+          })
+          .then((res) => res.data.data);
+        return response;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     deleteShipment: async (root, args) => {
-      const { token, id } = args; // Destructure token and id from args
-      const response = await axios
-        .delete(shipmentUrl + "/" + id, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to headers
-          },
-        })
-        .then((res) => res.data.data);
-      return response;
+      try {
+        const { token, id } = args; // Destructure token and id from args
+        const response = await axios
+          .delete(shipmentUrl + "/" + id, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add token to headers
+            },
+          })
+          .then((res) => res.data.data);
+        return response;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     // KYC
     deleteImage: async (_, { filename, token }) => {
