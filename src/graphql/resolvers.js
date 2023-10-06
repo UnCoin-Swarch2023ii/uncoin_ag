@@ -1,29 +1,57 @@
 import axios from "axios";
 
-const shipmentUrl = "http://localhost:3003/billing-api/";
-const userUrl = "http://localhost:3001/auth-api/user/"
-const companyUrl = "http://localhost:3001/auth-api/company/"
+const urlKycMs = "http://kyc_ms:3000/kyc-api";
+const urlTransactionsMs = "http://transactions_ms:3002/transactions-api";
+const shipmentUrl = "http://billing_ms:4000/billing-api/";
 
+// TODO: Review the next urls and their queries and mutations
+const userUrl = "http://users_ms:4001/auth-api/user";
+const companyUrl = "http://users_ms:4001/auth-api/company";
 
 export const resolvers = {
   Query: {
     // Users
     userByDocument: async (root, args) => {
-      const { document } = args;
-      const user = await axios.get(userUrl + "/get/" + document).then((res) => res.data.data);
-      return user;
+      try {
+        const { document } = args;
+        const user = await axios
+          .get(userUrl + "/get/" + document)
+          .then((res) => res.data);
+        return user;
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);
+      }
     },
 
     companyByDocument: async (root, args) => {
-      const { document } = args;
-      const shipments = await axios.get(companyUrl + "/get/" + document).then((res) => res.data.data);
-      return shipments;
+      try {
+        const { document } = args;
+        const company = await axios
+          .get(companyUrl + "/get/" + document)
+          .then((res) => res.data);
+        return company;
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);
+      }
+      
     },
 
     // Shipments
-    allShipments: async () => {
-      const shipments = await axios.get(shipmentUrl).then((res) => res.data.data);
-      return shipments;
+    allShipments: async (_, { token }) => {
+      try {
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+        const shipments = await axios
+          .get(shipmentUrl)
+          .then((res) => res.data.data);
+        return shipments;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
 
     shipmentsById: async (root, args) => {
@@ -42,34 +70,81 @@ export const resolvers = {
   Mutation: {
     // Users
     deleteUser: async (root, args) => {
-      const { document } = { args };
-      const response = await axios.delete(userUrl + "/delete" + document).then((res) => res.data.data);
-      return response;
+      try {
+        const { document } =  args ;
+        const response = await axios
+          .delete(userUrl + "/delete/" + document)
+          .then((res) => res.data.message);
+        return response;
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);        
+      }
+      
+    },
+    signInUser: async (root, args) => {
+      try {
+        const { ...user } = args ;
+        const response = await axios
+          .post(userUrl + "/signin", user)
+          .then((res) => res.data.users);
+        return response;        
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);        
+      }
+
     },
     signUpUser: async (root, args) => {
-      const { user } = { ...args };
-      const response = await axios.post(userUrl + "/signin", user).then((res) => res.data.data);
-      return response;
-    },
-    signUpUser: async (root, args) => {
-      const { user } = { ...args };
-      const response = await axios.post(userUrl + "/signup", user).then((res) => res.data.data);
-      return response;
+      try {
+        const { ...user } =  args ;
+        const response = await axios
+          .post(userUrl + "/signup", user)
+          .then((res) => res.data.users);
+        return response;        
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);        
+      }
     },
     updateUser: async (root, args) => {
-      const { document } = { args };
-      const response = await axios.put(userUrl + "/update" + document).then((res) => res.data.data);
-      return response;
+      try {
+        const { document, ...user} = args ;
+        const response = await axios
+          .put(userUrl + "/update/" + document, user)
+          .then((res) => res.data.message);
+        return response;        
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);        
+      }
+
     },
     signInCompany: async (root, args) => {
-      const { company } = { ...args };
-      const response = await axios.post(companyUrl + "/signin", company).then((res) => res.data.data);
-      return response;
+      try {
+        const { ...company } = args ;
+        const response = await axios
+          .post(companyUrl + "/signin", company)
+          .then((res) => res.data.users);
+        return response;        
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);        
+      }
+
     },
     signUpCompany: async (root, args) => {
-      const { company } = { ...args };
-      const response = await axios.post(companyUrl + "/signup", company).then((res) => res.data.data);
-      return response;
+      try {
+        const { ...company } =  args ;
+        const response = await axios
+          .post(companyUrl + "/signup", company)
+          .then((res) => res.data.users);
+        return response;        
+      } catch (error) {
+        console.error("An error occurred:" + error.response.data.message);
+        throw new Error(error);        
+      }
+
     },
 
     // Shipments
