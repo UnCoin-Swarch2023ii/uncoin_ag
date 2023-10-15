@@ -7,6 +7,7 @@ import { expressMiddleware } from "@apollo/server/express4";
 import express from "express";
 import http from "http";
 import cors from "cors";
+import bodyParser from "body-parser";
 
 export async function startApolloServer(typeDefs, resolvers) {
   const app = express();
@@ -18,7 +19,13 @@ export async function startApolloServer(typeDefs, resolvers) {
 
   await server.start();
 
-  app.use("/graphql", cors(), express.json(), expressMiddleware(server));
+  app.use(bodyParser.urlencoded({ extended: false }));
+
+  // parse application/json
+  app.use(bodyParser.json());
+  // Enable CORS to allow requests from other services within the Docker Compose network
+  app.use(cors());
+  app.use("/graphql", expressMiddleware(server));
 
   await new Promise((resolve) =>
     httpServer.listen({ port: process.env.PORT }, resolve)

@@ -24,8 +24,8 @@ export const typeDefs = gql`
     createChargeOrder(input: ChargeOrderInput, token: String): Order
     # Users
     deleteUser(document: Int, token: String): User
-    signInUser(user_name: String, document: Int, password: String): User
-    signUpUser(input: UserInput): Any
+    signInUser(input: signInInput): signUpOutput
+    signUpUser(input: UserInput): signUpOutput
     updateUser(document: Int, token: String): User
     signInCompany(
       company_name: String
@@ -99,6 +99,16 @@ export const typeDefs = gql`
   }
 
   # ----------- KYC -----------
+  input signInInput {
+    document: Int!
+    password: String!
+  }
+
+  type signUpOutput {
+    token: String
+    users: User
+  }
+
   type User {
     id: ID
     userName: String

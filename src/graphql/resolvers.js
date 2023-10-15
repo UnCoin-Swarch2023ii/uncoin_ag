@@ -1,23 +1,32 @@
 import axios from "axios";
 
-const urlKycMs = "http://localhost:3000/kyc-api";
-const urlTransactionsMs = "http://localhost:3002/transactions-api";
-const shipmentUrl = "http://localhost:4000/billing-api/";
+// const urlKycMs = "http://localhost:3000/kyc-api"; // Use service name "kyc_ms"
+// const urlTransactionsMs = "http://localhost:3002/transactions-api"; // Use service name "transactions_ms"
+// const shipmentUrl = "http://localhost:4000/billing-api"; // Use service name "billing_ms"
 
-// TODO: Review the next urls and their queries and mutations
-const userUrl = "http://localhost:4001/auth-api/user";
-const companyUrl = "http://localhost:4001/auth-api/company";
+// const userUrl = "http://localhost:4001/auth-api/user"; // Use service name "users_ms" for user service
+// const companyUrl = "http://localhost:4001/auth-api/company"; // Use service name "users_ms" for company service
+
+const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
+const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
+const shipmentUrl = "http://billing_ms:4000/billing-api"; // Use service name "billing_ms"
+
+const userUrl = "http://usersMs:8080/auth-api/user"; // Use service name "users_ms" for user service
+const companyUrl = "http://usersMs:8080/auth-api/company"; // Use service name "users_ms" for company service
 
 export const resolvers = {
   Query: {
     // Transactions
     listTransactions: async (_, { token }) => {
       try {
+        console.log(userUrl + "/validateToken/" + token);
         // Verify token with auth-ms
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
-        if (!isValid.data) throw new Error("Invalid token");
 
-        const response = await axios.get(urlTransactionsMs + "/");
+        console.log(isValid.data);
+        // if (!isValid.data) throw new Error("Invalid token");
+        // console.log("token is valid");
+        const response = await axios.get(urlTransactionsMs);
         return response.data;
       } catch (error) {
         console.error("An error occurred:" + error);
@@ -180,6 +189,20 @@ export const resolvers = {
         .delete(userUrl + "/delete" + document)
         .then((res) => res.data.data);
       return response;
+    },
+    signInUser: async (_, { input }) => {
+      try {
+        console.log(input);
+        const response = await axios.post(userUrl + "/signin", input, null, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        throw new Error(error);
+      }
     },
     signUpUser: async (_, { input }) => {
       try {
