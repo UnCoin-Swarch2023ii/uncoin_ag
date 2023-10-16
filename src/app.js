@@ -24,7 +24,13 @@ export async function startApolloServer(typeDefs, resolvers) {
   // parse application/json
   app.use(bodyParser.json());
   // Enable CORS to allow requests from other services within the Docker Compose network
-  app.use(cors());
+  // Allow all origins
+  app.use(
+    cors({
+      origin: "*",
+      credentials: true,
+    })
+  );
   app.use("/graphql", expressMiddleware(server));
 
   await new Promise((resolve) =>
