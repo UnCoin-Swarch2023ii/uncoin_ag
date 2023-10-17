@@ -99,12 +99,23 @@ export const resolvers = {
       }
     },
     // Users
-    userByDocument: async (root, args) => {
-      const { document } = args;
-      const user = await axios
-        .get(userUrl + "/get/" + document)
-        .then((res) => res.data.data);
-      return user;
+    userByDocument: async (_, { document, token }) => {
+      try {
+        // const user = await axios
+        //   .get(userUrl + "/get/" + document)
+        //   .then((res) => res.data.data);
+
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
+        const user = await axios.get(userUrl + "/get/" + document);
+
+        return user.data;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     companyByDocument: async (root, args) => {
       const { document } = args;
