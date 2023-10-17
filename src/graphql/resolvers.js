@@ -23,11 +23,27 @@ export const resolvers = {
         // Verify token with auth-ms
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
 
-        console.log(isValid.data);
-        // if (!isValid.data) throw new Error("Invalid token");
+        if (!isValid.data) throw new Error("Invalid token");
         // console.log("token is valid");
         const response = await axios.get(urlTransactionsMs);
-        return response.data;
+
+        // get users info
+        const { data } = response;
+
+        // change receiver id and sender id for user name in each data object
+        for (let i = 0; i < data.length; i++) {
+          const sender = await axios.get(userUrl + "/get/" + data[i].senderId);
+          const receiver = await axios.get(
+            userUrl + "/get/" + data[i].receiverId
+          );
+
+          data[i].senderId =
+            sender.data.username + " " + sender.data.userLastName;
+          data[i].receiverId =
+            receiver.data.username + " " + receiver.data.userLastName;
+        }
+
+        return data;
       } catch (error) {
         console.error("An error occurred:" + error);
         throw new Error(error);
@@ -39,8 +55,22 @@ export const resolvers = {
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
         if (!isValid.data) throw new Error("Invalid token");
 
-        const response = await axios.get(urlTransactionsMs + "/list/" + id);
-        return response.data;
+        const { data } = await axios.get(urlTransactionsMs + "/list/" + id);
+
+        // change receiver id and sender id for user name in each data object
+        for (let i = 0; i < data.length; i++) {
+          const sender = await axios.get(userUrl + "/get/" + data[i].senderId);
+          const receiver = await axios.get(
+            userUrl + "/get/" + data[i].receiverId
+          );
+
+          data[i].senderId =
+            sender.data.username + " " + sender.data.userLastName;
+          data[i].receiverId =
+            receiver.data.username + " " + receiver.data.userLastName;
+        }
+
+        return data;
       } catch (error) {
         console.error("An error occurred:" + error);
         throw new Error(error);
@@ -52,8 +82,17 @@ export const resolvers = {
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
         if (!isValid.data) throw new Error("Invalid token");
 
-        const response = await axios.get(urlTransactionsMs + "/detail/" + id);
-        return response.data;
+        const { data } = await axios.get(urlTransactionsMs + "/detail/" + id);
+
+        // change receiver id and sender id for user name in each data object
+        const sender = await axios.get(userUrl + "/get/" + data.senderId);
+        const receiver = await axios.get(userUrl + "/get/" + data.receiverId);
+
+        data.senderId = sender.data.username + " " + sender.data.userLastName;
+        data.receiverId =
+          receiver.data.username + " " + receiver.data.userLastName;
+
+        return data;
       } catch (error) {
         console.error("An error occurred:" + error);
         throw new Error(error);
