@@ -121,7 +121,7 @@ export const typeDefs = gql`
 
   type User {
     id: ID
-    username: String
+    userName: String
     userLastName: String
     password: String
     document: Int
