@@ -1,18 +1,18 @@
 import axios from "axios";
 
-// const urlKycMs = "http://localhost:3000/kyc-api"; // Use service name "kyc_ms"
-// const urlTransactionsMs = "http://localhost:3002/transactions-api"; // Use service name "transactions_ms"
-// const shipmentUrl = "http://localhost:4000/billing-api"; // Use service name "billing_ms"
+const urlKycMs = "http://localhost:3000/kyc-api"; // Use service name "kyc_ms"
+const urlTransactionsMs = "http://localhost:3002/transactions-api"; // Use service name "transactions_ms"
+const shipmentUrl = "http://localhost:4000/billing-api"; // Use service name "billing_ms"
 
-// const userUrl = "http://localhost:4001/auth-api/user"; // Use service name "users_ms" for user service
-// const companyUrl = "http://localhost:4001/auth-api/company"; // Use service name "users_ms" for company service
+const userUrl = "http://localhost:4001/auth-api/user"; // Use service name "users_ms" for user service
+const companyUrl = "http://localhost:4001/auth-api/company"; // Use service name "users_ms" for company service
 
-const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
-const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
-const shipmentUrl = "http://billing_ms:4000/billing-api"; // Use service name "billing_ms"
+// const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
+// const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
+// const shipmentUrl = "http://billing_ms:4000/billing-api"; // Use service name "billing_ms"
 
-const userUrl = "http://usersMs:8080/auth-api/user"; // Use service name "users_ms" for user service
-const companyUrl = "http://usersMs:8080/auth-api/company"; // Use service name "users_ms" for company service
+// const userUrl = "http://usersMs:8080/auth-api/user"; // Use service name "users_ms" for user service
+// const companyUrl = "http://usersMs:8080/auth-api/company"; // Use service name "users_ms" for company service
 
 export const resolvers = {
   Query: {
@@ -64,6 +64,9 @@ export const resolvers = {
             userUrl + "/get/" + data[i].receiverId
           );
 
+          console.log(sender.data);
+          console.log(receiver.data);
+
           data[i].senderId =
             sender.data.username + " " + sender.data.userLastName;
           data[i].receiverId =
@@ -110,7 +113,6 @@ export const resolvers = {
         if (!isValid.data) throw new Error("Invalid token");
 
         const user = await axios.get(userUrl + "/get/" + document);
-
         return user.data;
       } catch (error) {
         console.error("An error occurred:" + error);
@@ -208,6 +210,29 @@ export const resolvers = {
         // Verify token with auth-ms
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
         if (!isValid.data) throw new Error("Invalid token");
+
+        // check that user has enough balance
+        const { data } = await axios.get(userUrl + "/get/" + input.senderId);
+
+        if (data.balance < input.amount)
+          throw new Error("Insufficient balance");
+
+        // get user data
+        const sender = await axios.get(userUrl + "/get/" + input.senderId);
+        const receiver = await axios.get(userUrl + "/get/" + input.receiverId);
+
+        // update balance for sender and receiver
+        await axios.put(userUrl + "/update/" + input.senderId, {
+          ...sender.data,
+          userName: sender.data.username,
+          balance: sender.data.balance - input.amount,
+        });
+
+        await axios.put(userUrl + "/update/" + input.receiverId, {
+          ...receiver.data,
+          userName: receiver.data.username,
+          balance: receiver.data.balance + input.amount,
+        });
 
         const response = await axios.post(urlTransactionsMs + "/p2p", input);
         return response.data;
