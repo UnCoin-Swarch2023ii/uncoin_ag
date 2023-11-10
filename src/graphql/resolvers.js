@@ -1,18 +1,18 @@
 import axios from "axios";
 
-const urlKycMs = "http://localhost:3000/kyc-api"; // Use service name "kyc_ms"
-const urlTransactionsMs = "http://localhost:3002/transactions-api"; // Use service name "transactions_ms"
-const shipmentUrl = "http://localhost:4000/billing-api"; // Use service name "billing_ms"
+// const urlKycMs = "http://localhost:3000/kyc-api"; // Use service name "kyc_ms"
+// const urlTransactionsMs = "http://localhost:3002/transactions-api"; // Use service name "transactions_ms"
+// const shipmentUrl = "http://localhost:4000/billing-api"; // Use service name "billing_ms"
 
-const userUrl = "http://localhost:4001/auth-api/user"; // Use service name "users_ms" for user service
-const companyUrl = "http://localhost:4001/auth-api/company"; // Use service name "users_ms" for company service
+// const userUrl = "http://localhost:4001/auth-api/user"; // Use service name "users_ms" for user service
+// const companyUrl = "http://localhost:4001/auth-api/company"; // Use service name "users_ms" for company service
 
-// const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
-// const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
-// const shipmentUrl = "http://billing_ms:4000/billing-api"; // Use service name "billing_ms"
+const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
+const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
+const shipmentUrl = "http://billing_ms:4000/billing-api"; // Use service name "billing_ms"
 
-// const userUrl = "http://usersMs:8080/auth-api/user"; // Use service name "users_ms" for user service
-// const companyUrl = "http://usersMs:8080/auth-api/company"; // Use service name "users_ms" for company service
+const userUrl = "http://usersMs:8080/auth-api/user"; // Use service name "users_ms" for user service
+const companyUrl = "http://usersMs:8080/auth-api/company"; // Use service name "users_ms" for company service
 
 export const resolvers = {
   Query: {
