@@ -7,8 +7,8 @@ export const typeDefs = gql`
     getTransactionsByUserId(id: ID!, token: String): [Transaction]
     getTransactionById(id: ID!, token: String): Transaction
     # Users
-    userByDocument(document: Int, token: String): User!
-    companyByDocument(document: Int, token: String): Company!
+    userByDocument(document: Int, token: String): User
+    companyByDocument(document: Int, token: String): Company
     # Shipments
     allShipments(token: String): [Shipment]!
     shipmentsById(shipmentId: String, token: String): Shipment!
@@ -26,7 +26,11 @@ export const typeDefs = gql`
     deleteUser(document: Int, token: String): User
     signInUser(input: signInInput): signUpOutput
     signUpUser(input: UserInput): signUpOutput
-    updateUser(document: Int, token: String): User
+    updateUser(
+      document: Int
+      input: UserUpdateInput
+      token: String
+    ): String
     signInCompany(
       company_name: String
       document: Int
@@ -111,7 +115,7 @@ export const typeDefs = gql`
 
   type User {
     id: ID
-    userName: String
+    username: String
     userLastName: String
     password: String
     document: Int
@@ -126,6 +130,12 @@ export const typeDefs = gql`
     document: Int
     balance: Float
     enable: Boolean
+  }
+
+  input UserUpdateInput {
+    userName: String
+    userLastName: String
+    balance: Float
   }
 
   type Company {

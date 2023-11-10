@@ -4,8 +4,8 @@ import axios from "axios";
 // const urlTransactionsMs = "http://localhost:3002/transactions-api"; // Use service name "transactions_ms"
 // const shipmentUrl = "http://localhost:4000/billing-api"; // Use service name "billing_ms"
 
-// const userUrl = "http://localhost:4001/auth-api/user"; // Use service name "users_ms" for user service
-// const companyUrl = "http://localhost:4001/auth-api/company"; // Use service name "users_ms" for company service
+// const userUrl = "http://localhost:8080/auth-api/user"; // Use service name "users_ms" for user service
+// const companyUrl = "http://localhost:8080/auth-api/company"; // Use service name "users_ms" for company service
 
 const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
 const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
@@ -36,6 +36,7 @@ export const resolvers = {
     getTransactionsByUserId: async (_, { id, token }) => {
       try {
         // Verify token with auth-ms
+        console.log(id, token);
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
         if (!isValid.data) throw new Error("Invalid token");
 
@@ -64,7 +65,7 @@ export const resolvers = {
       const { document } = args;
       const user = await axios
         .get(userUrl + "/get/" + document)
-        .then((res) => res.data.data);
+        .then((res) => res.data);
       return user;
     },
     companyByDocument: async (root, args) => {
@@ -213,11 +214,14 @@ export const resolvers = {
         throw new Error(error);
       }
     },
-    updateUser: async (root, args) => {
-      const { document } = { args };
+    updateUser: async (_, { document, input, token }) => {
+      const isValid = await axios.post(userUrl + "/validateToken/" + token);
+      if (!isValid.data) throw new Error("Invalid token");
+
       const response = await axios
-        .put(userUrl + "/update" + document)
-        .then((res) => res.data.data);
+        .put(userUrl + "/update/" + document, input)
+        .then((res) => res.data.status);
+
       return response;
     },
     signInCompany: async (root, args) => {
