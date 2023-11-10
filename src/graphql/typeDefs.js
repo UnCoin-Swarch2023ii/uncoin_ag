@@ -102,6 +102,16 @@ export const typeDefs = gql`
     status: String!
   }
 
+  type TransactionsUser {
+    id: ID!
+    amount: Float!
+    description: String!
+    receiverId: User
+    senderId: User
+    type: String!
+    status: String!
+  }
+
   # ----------- KYC -----------
   input signInInput {
     document: Int!

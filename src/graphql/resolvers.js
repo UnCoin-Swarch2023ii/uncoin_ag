@@ -23,11 +23,27 @@ export const resolvers = {
         // Verify token with auth-ms
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
 
-        console.log(isValid.data);
-        // if (!isValid.data) throw new Error("Invalid token");
+        if (!isValid.data) throw new Error("Invalid token");
         // console.log("token is valid");
         const response = await axios.get(urlTransactionsMs);
-        return response.data;
+
+        // get users info
+        const { data } = response;
+
+        // change receiver id and sender id for user name in each data object
+        for (let i = 0; i < data.length; i++) {
+          const sender = await axios.get(userUrl + "/get/" + data[i].senderId);
+          const receiver = await axios.get(
+            userUrl + "/get/" + data[i].receiverId
+          );
+
+          data[i].senderId =
+            sender.data.username + " " + sender.data.userLastName;
+          data[i].receiverId =
+            receiver.data.username + " " + receiver.data.userLastName;
+        }
+
+        return data;
       } catch (error) {
         console.error("An error occurred:" + error);
         throw new Error(error);
@@ -40,8 +56,25 @@ export const resolvers = {
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
         if (!isValid.data) throw new Error("Invalid token");
 
-        const response = await axios.get(urlTransactionsMs + "/list/" + id);
-        return response.data;
+        const { data } = await axios.get(urlTransactionsMs + "/list/" + id);
+
+        // change receiver id and sender id for user name in each data object
+        for (let i = 0; i < data.length; i++) {
+          const sender = await axios.get(userUrl + "/get/" + data[i].senderId);
+          const receiver = await axios.get(
+            userUrl + "/get/" + data[i].receiverId
+          );
+
+          console.log(sender.data);
+          console.log(receiver.data);
+
+          data[i].senderId =
+            sender.data.username + " " + sender.data.userLastName;
+          data[i].receiverId =
+            receiver.data.username + " " + receiver.data.userLastName;
+        }
+
+        return data;
       } catch (error) {
         console.error("An error occurred:" + error);
         throw new Error(error);
@@ -53,20 +86,39 @@ export const resolvers = {
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
         if (!isValid.data) throw new Error("Invalid token");
 
-        const response = await axios.get(urlTransactionsMs + "/detail/" + id);
-        return response.data;
+        const { data } = await axios.get(urlTransactionsMs + "/detail/" + id);
+
+        // change receiver id and sender id for user name in each data object
+        const sender = await axios.get(userUrl + "/get/" + data.senderId);
+        const receiver = await axios.get(userUrl + "/get/" + data.receiverId);
+
+        data.senderId = sender.data.username + " " + sender.data.userLastName;
+        data.receiverId =
+          receiver.data.username + " " + receiver.data.userLastName;
+
+        return data;
       } catch (error) {
         console.error("An error occurred:" + error);
         throw new Error(error);
       }
     },
     // Users
-    userByDocument: async (root, args) => {
-      const { document } = args;
-      const user = await axios
-        .get(userUrl + "/get/" + document)
-        .then((res) => res.data);
-      return user;
+    userByDocument: async (_, { document, token }) => {
+      try {
+        // const user = await axios
+        //   .get(userUrl + "/get/" + document)
+        //   .then((res) => res.data.data);
+
+        // Verify token with auth-ms
+        const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        if (!isValid.data) throw new Error("Invalid token");
+
+        const user = await axios.get(userUrl + "/get/" + document);
+        return user.data;
+      } catch (error) {
+        console.error("An error occurred:" + error);
+        throw new Error(error);
+      }
     },
     companyByDocument: async (root, args) => {
       const { document } = args;
@@ -159,6 +211,29 @@ export const resolvers = {
         // Verify token with auth-ms
         const isValid = await axios.post(userUrl + "/validateToken/" + token);
         if (!isValid.data) throw new Error("Invalid token");
+
+        // check that user has enough balance
+        const { data } = await axios.get(userUrl + "/get/" + input.senderId);
+
+        if (data.balance < input.amount)
+          throw new Error("Insufficient balance");
+
+        // get user data
+        const sender = await axios.get(userUrl + "/get/" + input.senderId);
+        const receiver = await axios.get(userUrl + "/get/" + input.receiverId);
+
+        // update balance for sender and receiver
+        await axios.put(userUrl + "/update/" + input.senderId, {
+          ...sender.data,
+          userName: sender.data.username,
+          balance: sender.data.balance - input.amount,
+        });
+
+        await axios.put(userUrl + "/update/" + input.receiverId, {
+          ...receiver.data,
+          userName: receiver.data.username,
+          balance: receiver.data.balance + input.amount,
+        });
 
         const response = await axios.post(urlTransactionsMs + "/p2p", input);
         return response.data;
