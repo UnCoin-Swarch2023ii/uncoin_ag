@@ -1,18 +1,24 @@
 import axios from "axios";
 
-// const urlKycMs = "http://localhost:3000/kyc-api"; // Use service name "kyc_ms"
-// const urlTransactionsMs = "http://localhost:3002/transactions-api"; // Use service name "transactions_ms"
-// const shipmentUrl = "http://localhost:4000/billing-api"; // Use service name "billing_ms"
+// const urlKycMs = "http://192.168.1.65:3000/kyc-api"; // Use service name "kyc_ms"
+// const urlTransactionsMs = "http://192.168.1.65:3002/transactions-api"; // Use service name "transactions_ms"
+// const shipmentUrl = "http://192.168.1.65:4000/billing-api"; // Use service name "billing_ms"
 
-// const userUrl = "http://localhost:8080/auth-api/user"; // Use service name "users_ms" for user service
-// const companyUrl = "http://localhost:8080/auth-api/company"; // Use service name "users_ms" for company service
+// const userUrl = "http://192.168.1.65:8080/auth-api/user"; // Use service name "users_ms" for user service
+// const companyUrl = "http://192.168.1.65:8080/auth-api/company"; // Use service name "users_ms" for company service
 
-const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
-const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
-const shipmentUrl = "http://billing_ms:4000/billing-api"; // Use service name "billing_ms"
+// const urlKycMs = "http://kyc_ms:3000/kyc-api"; // Use service name "kyc_ms"
+// const urlTransactionsMs = "http://transactions_ms:3002/transactions-api"; // Use service name "transactions_ms"
+// const shipmentUrl = "http://billing_ms:4000/billing-api"; // Use service name "billing_ms"
+// const userUrl = "http://usersMs:8080/auth-api/user"; // Use service name "users_ms" for user service
+// const companyUrl = "http://usersMs:8080/auth-api/company"; // Use service name "users_ms" for company service
 
-const userUrl = "http://usersMs:8080/auth-api/user"; // Use service name "users_ms" for user service
-const companyUrl = "http://usersMs:8080/auth-api/company"; // Use service name "users_ms" for company service
+// TODO: Test kyc_ms
+const urlKycMs = "http://kyc-service:3000/kyc-api"; // Use service name "kyc_ms"
+const urlTransactionsMs = "http://transactions-service:3002/transactions-api"; // Use service name "transactions_ms"
+const userUrl = "http://auth-service:8080/auth-api/user"; // Use service name "users_ms" for user service
+const shipmentUrl = "http://billing-service:4000/billing-api"; // Use service name "billing_ms"
+const companyUrl = "http://auth-service:8080/auth-api/company"; // Use service name "users_ms" for company service
 
 export const resolvers = {
   Query: {
@@ -320,17 +326,29 @@ export const resolvers = {
         const { token, ...shipmentData } = args; // Destructure token from args
 
         // Verify token with auth-ms
-        const isValid = await axios.post(userUrl + "/validateToken/" + token);
-        if (!isValid.data) throw new Error("Invalid token");
+        // const isValid = await axios.post(userUrl + "/validateToken/" + token);
+        // if (!isValid.data) throw new Error("Invalid token");
 
         const shipment = { ...shipmentData };
         const response = await axios
-          .post(shipmentUrl, shipment, {
-            headers: {
-              Authorization: `Bearer ${token}`, // Add token to headers
+          .post(
+            shipmentUrl,
+            {
+              userId: 1,
+              companyId: 2,
+              shipmentValue: 5000,
+              shipmentDate: "2023-11-09T06:23:11.750+00:00",
             },
-          })
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // Add token to headers
+              },
+            }
+          )
           .then((res) => res.data.data);
+
+        console.log(response);
+
         return response;
       } catch (error) {
         console.error("An error occurred:" + error);
